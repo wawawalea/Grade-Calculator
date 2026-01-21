@@ -34,15 +34,22 @@
     </tbody>
 </table>
 
-<div style="text-align: center; margin-top: 30px;">
-    <div style="margin-bottom: 20px;">
-        <button onclick="showGoalCalculator()" class="btn" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); margin-right: 10px;">
+<div style="text-align: center; margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 10px; border: 2px solid #e0e0e0;">
+    <h3 style="color: #333; margin-bottom: 20px;">Additional Tools</h3>
+    <div style="margin-bottom: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+        <button onclick="showGoalCalculator()" class="btn" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); padding: 15px 30px; font-size: 1.1em; min-width: 200px;">
             🎯 Goal Calculator
         </button>
-        <button onclick="showWhatIfCalculator()" class="btn" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); margin-right: 10px;">
+        <button onclick="showWhatIfCalculator()" class="btn" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); padding: 15px 30px; font-size: 1.1em; min-width: 200px;">
             🔮 What-If Calculator
         </button>
     </div>
+    <p style="color: #666; font-size: 0.9em; margin: 10px 0 0 0;">
+        Set a target grade or explore different score scenarios
+    </p>
+</div>
+
+<div style="text-align: center; margin-top: 30px;">
     <div>
         <a href="{{ url_for('course_form', course_name=results.course_name) }}" class="btn" style="margin-right: 10px;">
             Calculate Again
