@@ -2,6 +2,8 @@
 
 A comprehensive web-based grade calculator that helps you calculate your course grades easily. Create custom courses or use predefined templates!
 
+Add courses and grading criteria --> calculate grades --> see what-if's and set goal.
+
 ## Features
 
 ### Core Functionality
