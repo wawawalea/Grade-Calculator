@@ -2,39 +2,22 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 from category import Category
 from course import Course
 import json
+import os
 
 app = Flask(__name__)
 app.secret_key = 'grade-calculator-secret-key-change-in-production'  # Change this in production
 
-# Predefined course configurations
-COURSE_CONFIGS = {
-    "Analysis": {
-        "categories": [
-            {"name": "Homework", "max_score": 40, "item_count": 10},
-            {"name": "Midterm", "max_score": 25, "item_count": 1},
-            {"name": "Final", "max_score": 35, "item_count": 1}
-        ],
-        "total_score": 100
-    },
-    "Parallel Computing": {
-        "categories": [
-            {"name": "Homework", "max_score": 15, "item_count": 10},
-            {"name": "Labs", "max_score": 30, "item_count": 6},
-            {"name": "Midterm Exam", "max_score": 25, "item_count": 1},
-            {"name": "Final Exam", "max_score": 30, "item_count": 1}
-        ],
-        "total_score": 100
-    },
-    "Theory of Computation": {
-        "categories": [
-            {"name": "Homework", "max_score": 25, "item_count": 8},
-            {"name": "Online Quizzes", "max_score": 5, "item_count": 5},
-            {"name": "Midterm", "max_score": 30, "item_count": 1},
-            {"name": "Final Exam", "max_score": 40, "item_count": 1}
-        ],
-        "total_score": 100
-    }
-}
+# Load predefined course configurations from external file (if it exists)
+# This file is gitignored so predefined courses won't be published
+# Users can create their own predefined_courses.py with their courses
+COURSE_CONFIGS = {}
+try:
+    from predefined_courses import COURSE_CONFIGS as PREDEFINED_CONFIGS
+    COURSE_CONFIGS = PREDEFINED_CONFIGS
+except ImportError:
+    # No predefined courses file - users start with an empty list
+    # They can create their own courses using the course builder
+    COURSE_CONFIGS = {}
 
 def get_all_courses():
     """Get all courses including predefined and custom ones"""
