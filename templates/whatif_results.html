@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}What-If Calculator - {{ results.course_name }}{% endblock %}
+
+{% block header %}
+<h1>🔮 What-If Calculator Results</h1>
+<p>{{ results.course_name }}</p>
+{% endblock %}
+
+{% block content %}
+<h2 style="color: #333; margin-bottom: 30px;">What-If Scenario Results</h2>
+
+<div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+        <div>
+            <p style="margin: 0; color: #666;">Current Total:</p>
+            <p style="margin: 5px 0 0 0; font-size: 1.3em; font-weight: bold;">{{ "%.2f"|format(results.current_total) }}/{{ results.total_max }}</p>
+            <p style="margin: 0; color: #666;">{{ "%.2f"|format((results.current_total / results.total_max) * 100) }}%</p>
+        </div>
+        <div>
+            <p style="margin: 0; color: #666;">What-If Total:</p>
+            <p style="margin: 5px 0 0 0; font-size: 1.3em; font-weight: bold; color: #667eea;">{{ "%.2f"|format(results.total_achieved) }}/{{ results.total_max }}</p>
+            <p style="margin: 0; color: #667eea;">{{ "%.2f"|format(results.total_percentage) }}%</p>
+        </div>
+        <div>
+            <p style="margin: 0; color: #666;">Difference:</p>
+            <p style="margin: 5px 0 0 0; font-size: 1.3em; font-weight: bold; color: {% if results.difference >= 0 %}#28a745{% else %}#dc3545{% endif %};">
+                {% if results.difference >= 0 %}+{% endif %}{{ "%.2f"|format(results.difference) }}
+            </p>
+            <p style="margin: 0; color: {% if results.difference >= 0 %}#28a745{% else %}#dc3545{% endif %};">
+                {% if results.difference >= 0 %}+{% endif %}{{ "%.2f"|format((results.difference / results.total_max) * 100) }}%
+            </p>
+        </div>
+    </div>
+</div>
+
+<h3 style="color: #333; margin-bottom: 20px;">Category Breakdown</h3>
+
+<table class="results-table">
+    <thead>
+        <tr>
+            <th>Category</th>
+            <th>Score</th>
+            <th>Percentage</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category in results.categories %}
+        <tr>
+            <td><strong>{{ category.name }}</strong></td>
+            <td>{{ "%.2f"|format(category.achieved) }}/{{ category.max_score }}</td>
+            <td class="percentage">{{ "%.2f"|format(category.percentage) }}%</td>
+        </tr>
+        {% endfor %}
+        <tr class="total-row">
+            <td><strong>Total Score</strong></td>
+            <td>{{ "%.2f"|format(results.total_achieved) }}/{{ results.total_max }}</td>
+            <td class="percentage" style="font-size: 1.2em;">{{ "%.2f"|format(results.total_percentage) }}%</td>
+        </tr>
+    </tbody>
+</table>
+
+{% if hypothetical_scores %}
+<div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin-top: 30px; border-left: 4px solid #667eea;">
+    <p style="margin: 0 0 10px 0;"><strong>📝 Items Modified:</strong></p>
+    <ul style="margin: 0; padding-left: 20px;">
+        {% for key, value in hypothetical_scores.items() %}
+        <li>{{ key.replace('_', ' #') }}: <strong>{{ "%.2f"|format(value) }}</strong></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div style="text-align: center; margin-top: 30px;">
+    <a href="{{ url_for('course_form', course_name=results.course_name) }}" class="btn" style="margin-right: 10px;">
+        Try Another Scenario
+    </a>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">
+        Back to Courses
+    </a>
+</div>
+{% endblock %}

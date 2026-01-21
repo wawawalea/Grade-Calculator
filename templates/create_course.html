@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}{% if course_name %}Edit Course{% else %}Create New Course{% endif %}{% endblock %}
+
+{% block header %}
+<h1>{% if course_name %}✏️ Edit Course{% else %}➕ Create New Course{% endif %}</h1>
+<p>Define your course structure</p>
+{% endblock %}
+
+{% block content %}
+<h2 style="color: #333; margin-bottom: 30px;">{% if course_name %}Edit: {{ course_name }}{% else %}Course Information{% endif %}</h2>
+
+<form id="courseForm">
+    <div class="form-group">
+        <label>Course Name *</label>
+        <input type="text" name="course_name" id="course_name" required 
+               value="{{ course_name if course_name else '' }}"
+               placeholder="e.g., Data Structures">
+    </div>
+    
+    <div class="form-group">
+        <label>Total Score (default: 100) *</label>
+        <input type="number" step="0.01" min="1" name="total_score" required 
+               value="{{ course_config['total_score'] if course_config else 100 }}"
+               placeholder="100">
+    </div>
+    
+    <h3 style="color: #333; margin-top: 30px; margin-bottom: 20px;">Categories</h3>
+    <p style="color: #666; margin-bottom: 20px;">Add categories (e.g., Homework, Exams, Labs, etc.)</p>
+    
+    <div id="categoriesContainer">
+        {% if course_config and course_config.get('categories') %}
+            {% for cat in course_config['categories'] %}
+            <div class="category-item" style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 15px; border: 2px solid #e0e0e0;">
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 15px; align-items: end;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>Category Name</label>
+                        <input type="text" class="cat-name" required value="{{ cat['name'] }}" placeholder="e.g., Homework">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>Max Score</label>
+                        <input type="number" step="0.01" min="0" class="cat-max-score" required value="{{ cat['max_score'] }}" placeholder="40">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label># of Items</label>
+                        <input type="number" min="1" class="cat-item-count" required value="{{ cat['item_count'] }}" placeholder="10">
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="removeCategory(this)" style="background: #dc3545;">
+                        Remove
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    
+    <button type="button" class="btn" onclick="addCategory()" style="margin-bottom: 30px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+        ➕ Add Category
+    </button>
+    
+    <div style="text-align: center; margin-top: 30px;">
+        <button type="submit" class="btn" style="font-size: 1.1em; padding: 15px 40px;">
+            {% if course_name %}Update Course{% else %}Create Course{% endif %}
+        </button>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary" style="margin-left: 10px;">
+            Cancel
+        </a>
+    </div>
+</form>
+
+<script>
+let categoryCounter = 0;
+
+function addCategory() {
+    categoryCounter++;
+    const container = document.getElementById('categoriesContainer');
+    const categoryDiv = document.createElement('div');
+    categoryDiv.className = 'category-item';
+    categoryDiv.style.cssText = 'background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 15px; border: 2px solid #e0e0e0;';
+    categoryDiv.innerHTML = `
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 15px; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>Category Name</label>
+                <input type="text" class="cat-name" required placeholder="e.g., Homework">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>Max Score</label>
+                <input type="number" step="0.01" min="0" class="cat-max-score" required placeholder="40">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label># of Items</label>
+                <input type="number" min="1" class="cat-item-count" required placeholder="10">
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="removeCategory(this)" style="background: #dc3545;">
+                Remove
+            </button>
+        </div>
+    `;
+    container.appendChild(categoryDiv);
+}
+
+function removeCategory(button) {
+    button.closest('.category-item').remove();
+}
+
+// Initialize with at least one category if empty
+if (document.querySelectorAll('.category-item').length === 0) {
+    addCategory();
+}
+
+document.getElementById('courseForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const courseName = document.getElementById('course_name').value.trim();
+    const totalScore = parseFloat(document.querySelector('[name="total_score"]').value);
+    
+    if (!courseName) {
+        alert('Please enter a course name');
+        return;
+    }
+    
+    const categories = [];
+    const categoryItems = document.querySelectorAll('.category-item');
+    
+    if (categoryItems.length === 0) {
+        alert('Please add at least one category');
+        return;
+    }
+    
+    categoryItems.forEach(item => {
+        const name = item.querySelector('.cat-name').value.trim();
+        const maxScore = parseFloat(item.querySelector('.cat-max-score').value);
+        const itemCount = parseInt(item.querySelector('.cat-item-count').value);
+        
+        if (name && !isNaN(maxScore) && !isNaN(itemCount) && itemCount > 0) {
+            categories.push({
+                name: name,
+                max_score: maxScore,
+                item_count: itemCount
+            });
+        }
+    });
+    
+    if (categories.length === 0) {
+        alert('Please fill in all category fields correctly');
+        return;
+    }
+    
+    const data = {
+        course_name: courseName,
+        total_score: totalScore,
+        categories: categories
+    };
+    
+    fetch('/create-course', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            window.location.href = result.redirect || '/';
+        } else {
+            alert(result.error || 'An error occurred');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+});
+</script>
+{% endblock %}

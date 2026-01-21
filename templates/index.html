@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="text-align: center; margin-bottom: 30px;">
+    <a href="{{ url_for('create_course') }}" class="btn" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); font-size: 1.1em; padding: 15px 40px;">
+        ➕ Create Custom Course
+    </a>
+</div>
+
+{% if custom_courses|length > 0 %}
+<h2 style="color: #333; margin-bottom: 20px; margin-top: 40px;">📚 Your Custom Courses</h2>
+<div class="course-grid">
+    {% for course in custom_courses %}
+    <div class="course-card" style="position: relative;">
+        <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 5px;">
+            <a href="{{ url_for('create_course', edit=course) }}" 
+               style="padding: 5px 10px; background: #667eea; color: white; border-radius: 5px; text-decoration: none; font-size: 0.8em;"
+               title="Edit">
+                ✏️
+            </a>
+            <button onclick="deleteCourse('{{ course }}')" 
+                    style="padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8em;"
+                    title="Delete">
+                🗑️
+            </button>
+        </div>
+        <h3>{{ course }}</h3>
+        <a href="{{ url_for('course_form', course_name=course) }}" class="btn">Calculate Grades</a>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if predefined_courses|length > 0 %}
+<h2 style="color: #333; margin-bottom: 20px; margin-top: 40px;">📖 Predefined Courses</h2>
+<div class="course-grid">
+    {% for course in predefined_courses %}
+    <div class="course-card">
+        <h3>{{ course }}</h3>
+        <a href="{{ url_for('course_form', course_name=course) }}" class="btn">Calculate Grades</a>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<script>
+function deleteCourse(courseName) {
+    if (confirm(`Are you sure you want to delete "${courseName}"? This cannot be undone.`)) {
+        fetch(`/delete-course/${encodeURIComponent(courseName)}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                location.reload();
+            } else {
+                alert(result.error || 'An error occurred');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
+    }
+}
+</script>
+{% endblock %}

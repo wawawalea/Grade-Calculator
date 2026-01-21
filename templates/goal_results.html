@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Goal Calculator - {{ course_name }}{% endblock %}
+
+{% block header %}
+<h1>🎯 Goal Calculator Results</h1>
+<p>{{ course_name }}</p>
+{% endblock %}
+
+{% block content %}
+<h2 style="color: #333; margin-bottom: 30px;">Goal Score Analysis</h2>
+
+<div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+    <p><strong>Current Total Score:</strong> {{ "%.2f"|format(current_total) }}/100</p>
+    <p><strong>Target Final Grade:</strong> {{ "%.2f"|format(target_grade) }}/100</p>
+    <p><strong>Score Needed:</strong> <span style="color: #28a745; font-weight: bold;">{{ "%.2f"|format(target_grade - current_total) }}</span> points</p>
+</div>
+
+{% if goal_scores %}
+<h3 style="color: #333; margin-bottom: 20px;">Goal Scores for Remaining Items</h3>
+<p style="color: #666; margin-bottom: 20px;">To reach your target, you need to achieve these scores on the remaining items:</p>
+
+<table class="results-table">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Current Score</th>
+            <th>Goal Score</th>
+            <th>Points Needed</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for key, scores in goal_scores.items() %}
+        <tr>
+            <td><strong>{{ key.replace('_', ' #') }}</strong></td>
+            <td>{{ "%.2f"|format(scores.current) }}</td>
+            <td style="color: #28a745; font-weight: bold;">{{ "%.2f"|format(scores.goal) }}</td>
+            <td style="color: #28a745;">+{{ "%.2f"|format(scores.needed) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 30px; border-left: 4px solid #28a745;">
+    <p style="margin: 0;"><strong>💡 Tip:</strong> Scores are distributed across multiple categories to give you the most balanced approach to reaching your goal.</p>
+</div>
+{% else %}
+<div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #ffc107;">
+    <p style="margin: 0;"><strong>✅ Great news!</strong> You've already reached or exceeded your target grade, or there are no remaining items to improve.</p>
+</div>
+{% endif %}
+
+<div style="text-align: center; margin-top: 30px;">
+    <a href="{{ url_for('course_form', course_name=course_name) }}" class="btn" style="margin-right: 10px;">
+        Calculate Again
+    </a>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">
+        Back to Courses
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Results - {{ results.course_name }}{% endblock %}
+
+{% block header %}
+<h1>📊 Grade Results</h1>
+<p>{{ results.course_name }}</p>
+{% endblock %}
+
+{% block content %}
+<h2 style="color: #333; margin-bottom: 30px;">Your Grade Breakdown</h2>
+
+<table class="results-table">
+    <thead>
+        <tr>
+            <th>Category</th>
+            <th>Score</th>
+            <th>Percentage</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category in results.categories %}
+        <tr>
+            <td><strong>{{ category.name }}</strong></td>
+            <td>{{ "%.2f"|format(category.achieved) }}/{{ category.max_score }}</td>
+            <td class="percentage">{{ "%.2f"|format(category.percentage) }}%</td>
+        </tr>
+        {% endfor %}
+        <tr class="total-row">
+            <td><strong>Total Score</strong></td>
+            <td>{{ "%.2f"|format(results.total_achieved) }}/{{ results.total_max }}</td>
+            <td class="percentage" style="font-size: 1.2em;">{{ "%.2f"|format(results.total_percentage) }}%</td>
+        </tr>
+    </tbody>
+</table>
+
+<div style="text-align: center; margin-top: 30px;">
+    <div style="margin-bottom: 20px;">
+        <button onclick="showGoalCalculator()" class="btn" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); margin-right: 10px;">
+            🎯 Goal Calculator
+        </button>
+        <button onclick="showWhatIfCalculator()" class="btn" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); margin-right: 10px;">
+            🔮 What-If Calculator
+        </button>
+    </div>
+    <div>
+        <a href="{{ url_for('course_form', course_name=results.course_name) }}" class="btn" style="margin-right: 10px;">
+            Calculate Again
+        </a>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+            Back to Courses
+        </a>
+    </div>
+</div>
+
+<!-- Goal Calculator Modal -->
+<div id="goalModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto;">
+    <div style="max-width: 600px; margin: 50px auto; background: white; border-radius: 15px; padding: 30px;">
+        <h2 style="margin-bottom: 20px;">🎯 Goal Score Calculator</h2>
+        <p style="color: #666; margin-bottom: 20px;">Enter your target final grade to calculate what scores you need on remaining items.</p>
+        <form id="goalForm">
+            <input type="hidden" name="course_name" value="{{ results.course_name }}">
+            {% if current_scores %}
+                {% for key, value in current_scores.items() %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                {% endfor %}
+            {% endif %}
+            <div class="form-group">
+                <label>Target Final Grade (out of {{ results.total_max }})</label>
+                <input type="number" step="0.01" min="0" max="{{ results.total_max }}" name="target_grade" required 
+                       placeholder="e.g., 90" value="{{ (results.total_achieved + 5)|round(2) }}">
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button type="submit" class="btn">Calculate Goal Scores</button>
+                <button type="button" onclick="closeGoalModal()" class="btn btn-secondary" style="margin-left: 10px;">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- What-If Calculator Modal -->
+<div id="whatifModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto;">
+    <div style="max-width: 700px; margin: 50px auto; background: white; border-radius: 15px; padding: 30px;">
+        <h2 style="margin-bottom: 20px;">🔮 What-If Calculator</h2>
+        <p style="color: #666; margin-bottom: 20px;">Enter hypothetical scores to see what your final grade would be.</p>
+        <form id="whatifForm">
+            <input type="hidden" name="course_name" value="{{ results.course_name }}">
+            {% if current_scores %}
+                {% for key, value in current_scores.items() %}
+                <input type="hidden" name="current_{{ key }}" value="{{ value }}">
+                {% endfor %}
+            {% endif %}
+            <div style="margin-bottom: 20px;">
+                <p><strong>Current Total: {{ "%.2f"|format(results.total_achieved) }}/{{ results.total_max }} ({{ "%.2f"|format(results.total_percentage) }}%)</strong></p>
+                <p style="color: #666; font-size: 0.9em;">Leave blank to use current score, or enter a hypothetical score.</p>
+            </div>
+            {% if config %}
+                {% for cat_config in config.categories %}
+                <div class="form-group">
+                    <label>{{ cat_config.name }} (Max: {{ cat_config.max_score }} points)</label>
+                    <div class="score-inputs">
+                        {% for i in range(cat_config.item_count) %}
+                            {% set key = cat_config.name + "_" + (i|string) %}
+                            {% set current_val = current_scores.get(key, 0) if current_scores else 0 %}
+                            <input type="number" step="0.01" min="0" 
+                                   name="hypothetical_{{ key }}" 
+                                   placeholder="Current: {{ current_val }}"
+                                   id="hyp_{{ key }}">
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                {% for category in results.categories %}
+                <div class="form-group">
+                    <label>{{ category.name }}</label>
+                    <p style="color: #666; font-size: 0.9em;">Please use the course form to access the what-if calculator.</p>
+                </div>
+                {% endfor %}
+            {% endif %}
+            <div style="text-align: center; margin-top: 20px;">
+                <button type="submit" class="btn">Calculate What-If</button>
+                <button type="button" onclick="closeWhatIfModal()" class="btn btn-secondary" style="margin-left: 10px;">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function showGoalCalculator() {
+    document.getElementById('goalModal').style.display = 'block';
+}
+
+function closeGoalModal() {
+    document.getElementById('goalModal').style.display = 'none';
+}
+
+function showWhatIfCalculator() {
+    document.getElementById('whatifModal').style.display = 'block';
+}
+
+function closeWhatIfModal() {
+    document.getElementById('whatifModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const goalModal = document.getElementById('goalModal');
+    const whatifModal = document.getElementById('whatifModal');
+    if (event.target == goalModal) {
+        goalModal.style.display = 'none';
+    }
+    if (event.target == whatifModal) {
+        whatifModal.style.display = 'none';
+    }
+}
+
+// Goal form submission
+document.getElementById('goalForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const data = {};
+    for (let [key, value] of formData.entries()) {
+        data[key] = value;
+    }
+    
+    fetch('/goal', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.text())
+    .then(html => {
+        document.body.innerHTML = html;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+});
+
+// What-if form submission
+document.getElementById('whatifForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const data = {};
+    for (let [key, value] of formData.entries()) {
+        if (value) {  // Only include non-empty values
+            data[key] = value;
+        }
+    }
+    
+    fetch('/whatif', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.text())
+    .then(html => {
+        document.body.innerHTML = html;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+});
+</script>
+{% endblock %}
