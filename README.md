@@ -36,7 +36,7 @@ python3 app.py
 
 2. Open your web browser and navigate to:
 ```
-http://localhost:5000
+http://localhost:5001
 ```
 
 3. Select a course, enter your scores, and view your grade breakdown!

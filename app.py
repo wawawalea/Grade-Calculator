@@ -272,4 +272,4 @@ def calculate_whatif():
     return render_template('whatif_results.html', results=whatif_results, hypothetical_scores=hypothetical_scores)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5001)

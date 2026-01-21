@@ -34,18 +34,18 @@
     </tbody>
 </table>
 
-<div style="text-align: center; margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 10px; border: 2px solid #e0e0e0;">
-    <h3 style="color: #333; margin-bottom: 20px;">Additional Tools</h3>
-    <div style="margin-bottom: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-        <button onclick="showGoalCalculator()" class="btn" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); padding: 15px 30px; font-size: 1.1em; min-width: 200px;">
+<div style="text-align: center; margin-top: 40px; padding: 25px; background: linear-gradient(135deg, #f8f9fa 0%, #e8f5e9 100%); border-radius: 15px; border: 3px solid #28a745; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);">
+    <h3 style="color: #333; margin-bottom: 25px; font-size: 1.5em;">🎯 Additional Tools</h3>
+    <div style="margin-bottom: 20px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+        <button onclick="showGoalCalculator()" class="btn" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); padding: 18px 35px; font-size: 1.2em; min-width: 220px; font-weight: bold; box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3); cursor: pointer;">
             🎯 Goal Calculator
         </button>
-        <button onclick="showWhatIfCalculator()" class="btn" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); padding: 15px 30px; font-size: 1.1em; min-width: 200px;">
+        <button onclick="showWhatIfCalculator()" class="btn" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); padding: 18px 35px; font-size: 1.2em; min-width: 220px; font-weight: bold; box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3); cursor: pointer;">
             🔮 What-If Calculator
         </button>
     </div>
-    <p style="color: #666; font-size: 0.9em; margin: 10px 0 0 0;">
-        Set a target grade or explore different score scenarios
+    <p style="color: #666; font-size: 1em; margin: 15px 0 0 0; font-weight: 500;">
+        📊 Set a target grade or explore different score scenarios
     </p>
 </div>
 
@@ -135,19 +135,37 @@
 
 <script>
 function showGoalCalculator() {
-    document.getElementById('goalModal').style.display = 'block';
+    const modal = document.getElementById('goalModal');
+    if (modal) {
+        modal.style.display = 'block';
+    } else {
+        console.error('Goal modal not found!');
+        alert('Goal Calculator modal not found. Please refresh the page.');
+    }
 }
 
 function closeGoalModal() {
-    document.getElementById('goalModal').style.display = 'none';
+    const modal = document.getElementById('goalModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 function showWhatIfCalculator() {
-    document.getElementById('whatifModal').style.display = 'block';
+    const modal = document.getElementById('whatifModal');
+    if (modal) {
+        modal.style.display = 'block';
+    } else {
+        console.error('What-If modal not found!');
+        alert('What-If Calculator modal not found. Please refresh the page.');
+    }
 }
 
 function closeWhatIfModal() {
-    document.getElementById('whatifModal').style.display = 'none';
+    const modal = document.getElementById('whatifModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 // Close modal when clicking outside
