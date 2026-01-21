@@ -22,6 +22,21 @@ Add courses and grading criteria --> calculate grades --> see what-if's and set 
 - Easy-to-use forms for creating courses and entering scores
 - Beautiful visualizations of grade breakdowns
 
+## Pre-Installation Installation
+
+1. Hit the green button "Code" on the top-right of the repository
+
+2. Select "Download zip"
+
+3. On your local machine, open the terminal, copy and paste:
+   ```bash
+   cd ~/Grade\ Calculator
+   ```
+   (If not work, try)
+   ```bash
+   cd ~/"Grade Calculator"
+   ```
+  
 ## Installation
 
 1. Install the required dependencies:
